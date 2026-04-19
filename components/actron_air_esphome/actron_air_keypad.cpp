@@ -28,7 +28,7 @@ static constexpr std::array<BinarySensorMapping, BINARY_SENSOR_COUNT>
         {LedIndex::ZONE_2, false},
         {LedIndex::ZONE_3, false},
         {LedIndex::ZONE_4, false},
-        {LedIndex::ZONE_5, true}, // Zones 5-8 have inverted logic
+        {LedIndex::ZONE_5, true},  // Zones 5-8 have inverted logic
         {LedIndex::ZONE_6, true},
         {LedIndex::ZONE_7, true},
         {LedIndex::ZONE_8, true},
@@ -70,10 +70,10 @@ char ActronAirKeypad::decode_digit(uint8_t pattern) {
 
   case 0x79:
     return 'E'; // ADEFG
+  case 0x5F:
+    return 'S'; // ABDEFG
   case 0x73:
     return 'P'; // ABEFG
-  case 0x5F:
-    return 'S'; // AFGCD
 
   default:
     ESP_LOGE(TAG, "Unknown 7-segment pattern: 0x%02X", pattern);
@@ -120,44 +120,103 @@ float ActronAirKeypad::get_display_value() const {
 }
 
 void IRAM_ATTR ActronAirKeypad::handle_interrupt(ActronAirKeypad *arg) {
-  auto now_us = micros();
-  unsigned long delta_us = now_us - arg->last_intr_us_;
-  arg->last_intr_us_ = now_us;
-
-  if (delta_us > FRAME_BOUNDARY_US) {
-    arg->has_data_error_.store(false, std::memory_order_relaxed);
-
+  ActronAirKeypad *keypad = static_cast<ActronAirKeypad *>(arg);
+  uint64_t now_us = esp_timer_get_time();
+  
+  if (keypad->last_intr_us_ == 0) {
+    // First interrupt - just initialize timestamp
+    keypad->last_intr_us_ = now_us;
     return;
   }
 
+  // Calculate time since last pulse and save timestamp for next calculation
+  uint64_t delta_us = now_us - keypad->last_intr_us_;
+  
+  if (delta_us < DEBOUNCE_US) {
+    // We are within the debounce period - ignore this pulse
+    return;
+  }
+  
+  keypad->last_intr_us_ = now_us;
+  
+  uint64_t frame_age_us = 0;
+  // Calculate age of current frame if we have seen a start condition - this is used to detect if we have timed out waiting for the rest of the frame
+  if(keypad->frame_start_us_ != 0) {
+    frame_age_us = now_us - keypad->frame_start_us_;
+  }
+  
+  uint8_t idx = keypad->local_num_pulses_;
+
+  //buffer start is first pulse after an extended period of inactivity (start condition = 90mSec without pulses)
+  // This indicates the start of a new frame - publish last frame (if valid), reset state and start collecting pulses
   if (delta_us >= START_CONDITION_US) {
-    // Reset staging buffer for new frame
-    arg->local_pulse_bits_ = 0;
-    arg->num_low_pulses_.store(0, std::memory_order_relaxed);
 
+    if(keypad->in_frame_) {
+      // We have a full frame - publish it
+      if (idx == NPULSE) {
+        keypad->pulse_bits_.store(keypad->local_pulse_bits_, std::memory_order_relaxed);
+        keypad->last_error_code_.store(ERROR_NONE, std::memory_order_relaxed);
+      }
+      else if (idx > NPULSE) {
+        // We have more pulses than expected
+        keypad->last_error_code_.store(ERROR_FRAME_OVERFLOW, std::memory_order_relaxed);
+        keypad->error_count_.fetch_add(1, std::memory_order_relaxed);
+      } else {
+        // Not a full frame 
+        keypad->last_error_code_.store(ERROR_INCOMPLETE_FRAME, std::memory_order_relaxed);
+        keypad->error_count_.fetch_add(1, std::memory_order_relaxed);
+      }   
+          
+      // Save state and signal main loop to process frame or error
+      keypad->num_pulses_.store(idx, std::memory_order_release);
+      keypad->signal_main_loop_.store(true, std::memory_order_release);
+      keypad->enable_loop_soon_any_context();
+    } 
+  
+    // Reset staging buffer for new frame
+    keypad->local_pulse_bits_ = 0;
+    keypad->local_num_pulses_ = 0;
+    keypad->frame_start_us_ = now_us;
+    keypad->in_frame_ = true;
+  
+    return;
+  } 
+  
+  if (!keypad->in_frame_) {
+    // We haven't seen a start condition yet - ignore any pulses
     return;
   }
 
-  uint8_t idx = arg->num_low_pulses_.load(std::memory_order_relaxed);
-  if (idx >= NPULSE) {
-    arg->has_data_error_.store(true, std::memory_order_relaxed);
-    arg->error_count_.fetch_add(1, std::memory_order_relaxed);
+  //check error conditions before processing pulse - if any of these are true then we know the current frame is invalid and we can abort early without doing any more work
+  //if a bit boundary time has elapsed then error - this means we missed some pulses and the current frame is invalid
+  if (delta_us > BIT_BOUNDARY_US) {
+    keypad->in_frame_ = false;
+    keypad->num_pulses_.store(idx, std::memory_order_release);
+    keypad->last_error_code_.store(ERROR_BIT_BOUNDARY, std::memory_order_relaxed);
+    keypad->error_count_.fetch_add(1, std::memory_order_relaxed);
+    keypad->signal_main_loop_.store(true, std::memory_order_release);
+    keypad->enable_loop_soon_any_context();
+    return;
+  }
 
+    //if a frame boundary time has elapsed then error - this means we missed some pulses and the current frame is invalid
+  if (frame_age_us > FRAME_TIMEOUT_US) {
+    keypad->in_frame_ = false;
+    keypad->num_pulses_.store(idx, std::memory_order_release);
+    keypad->last_error_code_.store(ERROR_FRAME_TIMEOUT, std::memory_order_relaxed);
+    keypad->error_count_.fetch_add(1, std::memory_order_relaxed);
+    keypad->signal_main_loop_.store(true, std::memory_order_release);
+    keypad->enable_loop_soon_any_context();
     return;
   }
 
   // Set bit in staging buffer if pulse is short (logic 1)
-  if (delta_us < PULSE_THRESHOLD_US) {
-    arg->local_pulse_bits_ |= (1ULL << idx);
+  if (delta_us < PULSE_THRESHOLD_US && idx < NPULSE) {
+    keypad->local_pulse_bits_ |= (1ULL << idx);
   }
-  arg->num_low_pulses_.store(idx + 1, std::memory_order_relaxed);
+  
+  keypad->local_num_pulses_ =idx + 1;
 
-  // Publish complete frame atomically when we have all bits
-  if (idx + 1 == NPULSE) {
-    arg->pulse_bits_.store(arg->local_pulse_bits_, std::memory_order_release);
-  }
-
-  arg->do_work_.store(true, std::memory_order_release);
 }
 
 void ActronAirKeypad::setup() {
@@ -177,40 +236,48 @@ void ActronAirKeypad::setup() {
 }
 
 void ActronAirKeypad::loop() {
-  unsigned long now_us = micros();
 
-  if (do_work_.load(std::memory_order_acquire)) {
-    do_work_.store(false, std::memory_order_relaxed);
-    last_work_us_ = now_us;
-
+  //if we haven't been signaled by the ISR  then nothing to do
+  if (!this->signal_main_loop_.load(std::memory_order_acquire)) {
+    this->disable_loop();
     return;
   }
 
-  unsigned long delta_us = now_us - last_work_us_;
-  uint8_t num_pulses = num_low_pulses_.load(std::memory_order_acquire);
-  if (delta_us > FRAME_TIMEOUT_US && num_pulses) {
-    if (num_pulses == NPULSE &&
-        !has_data_error_.load(std::memory_order_acquire)) {
+  // Reset signal for main loop
+  this->signal_main_loop_.store(false, std::memory_order_release);
+
+  uint8_t num_pulses = num_pulses_.load(std::memory_order_acquire);
+  
+  //If we have a full frame then process.
+  if (num_pulses && num_pulses == NPULSE){
       // No InterruptLock needed - single atomic load
       uint64_t bits = pulse_bits_.load(std::memory_order_acquire);
-      if (bits != pulses_) {
-        pulses_ = bits;
-        has_new_data_ = true;
-      }
-    } else {
-      ESP_LOGVV(TAG, "Only %u bits received (or data error: %u)", num_pulses,
-                has_data_error_.load(std::memory_order_relaxed) ? 1 : 0);
+
+      if (bits != this->pulses_) {
+        this->pulses_ = bits;
+        this->has_new_data_ = true;
+        this->status_count_++;
+
+        if (status_count_sensor_) { //update status count when data changes
+        status_count_sensor_->publish_state(status_count_);
+        }        
+      }  
+  } else {
+    uint8_t error_code = this->last_error_code_.load(std::memory_order_relaxed);
+    ESP_LOGD(TAG, "%u bits received (or data error code: %u)", num_pulses, error_code);
+    
+    //publish error count  even if we don't have a full frame - this way we can track errors and see if we are getting partial frames which can be useful for troubleshooting
+    if (error_count_sensor_) {
+      error_count_sensor_->publish_state(
+      error_count_.load(std::memory_order_relaxed));
     }
-
-    num_low_pulses_.store(0, std::memory_order_relaxed);
-    last_work_us_ = now_us;
   }
-
-  if (!has_new_data_) {
+  
+  if (!this->has_new_data_) {
     return;
   }
 
-  has_new_data_ = false;
+  this->has_new_data_ = false;
   ESP_LOGD(TAG, "New data available");
 
   if (bit_string_) {
@@ -219,16 +286,12 @@ void ActronAirKeypad::loop() {
     for (std::size_t i = 0; i < NPULSE; ++i) {
       text += ((pulses_ >> i) & 1) ? '1' : '0';
     }
+    ESP_LOGD(TAG, "bit string: %s", text.c_str());
     bit_string_->publish_state(text);
   }
 
   if (setpoint_temp_) {
     setpoint_temp_->publish_state(get_display_value());
-  }
-
-  if (error_count_sensor_) {
-    error_count_sensor_->publish_state(
-        error_count_.load(std::memory_order_relaxed));
   }
 
   for (std::size_t i = 0; i < BINARY_SENSOR_COUNT; ++i) {

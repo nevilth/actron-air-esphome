@@ -1,8 +1,12 @@
-cdeps
-node_modules
-dist
-.venv
-.esphome
+/cdeps
+/node_modules
+/dist
+/.venv
+/.esphome
+/.esphome/
+/secrets.yaml
+/esp32dev-actron-211704.yaml
+
 custom_components/actron_air_esphome/frontend/actron-air-esphome-card.js
 
 # Home Assistant dev config (runtime files)

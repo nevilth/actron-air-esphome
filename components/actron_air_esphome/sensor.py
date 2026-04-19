@@ -17,6 +17,7 @@ DEPENDENCIES = ['actron_air_esphome']
 
 CONF_SETPOINT_TEMP = 'setpoint_temp'
 CONF_ERROR_COUNT = 'error_count'
+CONF_STATUS_COUNT = 'status_count'
 
 CONFIG_SCHEMA = cv.Schema(
     {
@@ -31,6 +32,11 @@ CONFIG_SCHEMA = cv.Schema(
             accuracy_decimals=0,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
+        cv.Optional(CONF_STATUS_COUNT): sensor.sensor_schema(
+            accuracy_decimals=0,
+            state_class=STATE_CLASS_MEASUREMENT,
+        ),
+
     }
 )
 
@@ -45,3 +51,7 @@ async def to_code(config: dict[str, Any]) -> None:
     if CONF_ERROR_COUNT in config:
         sens = await sensor.new_sensor(config[CONF_ERROR_COUNT])
         cg.add(parent.set_error_count_sensor(sens))
+
+    if CONF_STATUS_COUNT in config:
+        sens = await sensor.new_sensor(config[CONF_STATUS_COUNT])
+        cg.add(parent.set_status_count_sensor(sens))
