@@ -4,7 +4,7 @@
 #
 # Usage:
 #   packages:
-#     actron_air: github://johnf/actron-air-esphome/actron_air_keypad.yaml@main
+#     actron_air: github://nevilth/actron-air-esphome/actron_air_keypad.yaml@main
 #
 # All substitutions below can be overridden in your configuration.
 
@@ -158,12 +158,25 @@ button:
           id(dac_value)=${voltage_timer_down};
           id(press_button).press();
 
+  - platform: restart
+    name: "Restart"
+    disabled_by_default: true
+
+  - platform: shutdown
+    name: "Shutdown"
+    disabled_by_default: true
+
+  - platform: safe_mode
+    name: "Restart (Safe Mode)" 
+    disabled_by_default: true
+  
 # Power and zone control switches
 switch:
   - platform: template
     icon: mdi:power
     id: power
     name: "Power"
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_power};
@@ -179,6 +192,7 @@ switch:
     id: zone_1_switch
     name: "Zone 1"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_1};
@@ -193,6 +207,7 @@ switch:
     id: zone_2_switch
     name: "Zone 2"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_2};
@@ -207,6 +222,7 @@ switch:
     id: zone_3_switch
     name: "Zone 3"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_3};
@@ -221,6 +237,7 @@ switch:
     id: zone_4_switch
     name: "Zone 4"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_4};
@@ -249,6 +266,7 @@ switch:
     id: zone_6_switch
     name: "Zone 6"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_6};
@@ -263,6 +281,7 @@ switch:
     id: zone_7_switch
     name: "Zone 7"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_7};
@@ -277,6 +296,7 @@ switch:
     id: zone_8_switch
     name: "Zone 8"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_8};
@@ -288,7 +308,7 @@ switch:
     lambda: return id(zone_8).state;
 
 external_components:
-  - source: github://johnf/actron-air-esphome
+  - source: github://nevilth/actron-air-esphome
     components: [actron_air_esphome]
     refresh: 0s
 
@@ -306,7 +326,31 @@ sensor:
     error_count:
       name: "Error Count"
       id: error_count
+      icon: mdi:alert-circle
+      disabled_by_default: true
+    status_count:
+      name: "Status Count"
+      id: status_count
+      icon: mdi:information-outline
+      disabled_by_default: true
 
+  - platform: wifi_signal # Reports the WiFi signal strength/RSSI in dB
+    name: "WiFi Signal dB"
+    id: wifi_signal_db
+    disabled_by_default: true
+    update_interval: 60s
+    entity_category: "diagnostic"
+  
+  - platform: copy # Reports the WiFi signal strength in %
+    source_id: wifi_signal_db
+    name: "WiFi Signal Percent"
+    disabled_by_default: true
+    filters:
+      - lambda: return min(max(2 * (x + 100.0), 0.0), 100.0);
+    unit_of_measurement: "Signal %"
+    entity_category: "diagnostic"
+    device_class: ""
+   
 text_sensor:
   - platform: actron_air_esphome
     bit_string:
@@ -319,8 +363,8 @@ text_sensor:
     update_interval: 1s
     lambda: |-
       std::string current_fan = "";
-      if (id(fan_high).state and !id(fan_cont).state) {
-        current_fan="High";
+      if(id(fan_high).state and id(fan_mid).state and id(fan_low).state) {
+        current_fan="ESP";
       } else if (id(fan_mid).state and !id(fan_cont).state) {
         current_fan="Medium";
       } else if (id(fan_low).state and !id(fan_cont).state) {
@@ -339,6 +383,37 @@ text_sensor:
         return {current_fan};
       }
       return {};
+
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+      disabled_by_default: true
+    ssid:
+      name: Connected SSID
+      disabled_by_default: true
+    mac_address:
+      name: MAC Address
+      disabled_by_default: true
+    scan_results:
+      disabled_by_default: true
+      name: Scan Results
+    dns_address:
+      disabled_by_default: true
+      name: DNS Address
+    power_save_mode:
+      disabled_by_default: true
+      name: Wifi Power Save Mode  
+  
+  - platform: uptime
+    name: Uptime
+    disabled_by_default: true
+    format:
+      separator: " "
+      days: "D"
+  
+  - platform: version
+    name: "ESPHome Version"
+    disabled_by_default: true
 
 binary_sensor:
   - platform: actron_air_esphome

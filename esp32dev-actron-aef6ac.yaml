@@ -1,0 +1,71 @@
+substitutions:
+ 
+  esphome_name: "esp32dev-actron-211704" # name for the ESP32 device
+  esphome_friendly_name: "Actron Keypad"
+  area: "Hallway"
+
+  esp32_variant: "esp32c3"
+  encryption_key: "jXAiW86Ttz+nwh1EuU3E/yihJXycevN/hyoBS89W6oo="
+ 
+  # GPIO Configuration
+  gpio_status_pin: "GPIO0"     # Pin for the status signal (from power line)
+  gpio_i2c_sda: "GPIO10"       # I2C SDA pin
+  gpio_i2c_scl: "GPIO3"        # I2C SCL pin
+  gpio_reset_pin: "GPIO1"      # Pin to reset the mcp23017 (if needed)
+
+  # MCP23017 I2C address (default 0x20, change if you have other I2C devices or a different address)
+  mcp23017_address: "0x20"
+  
+  # pin numbers values for button presses
+  pin_power: "15"
+  pin_mode: "14"
+  pin_fan: "13"
+  pin_temp_up: "12"
+  pin_temp_down: "11"
+  pin_timer: "10"
+  pin_timer_up: "9"
+  pin_timer_down: "8"
+
+  # Zone pin numbers 
+  pin_zone_1: "7"
+  pin_zone_2: "6"
+  pin_zone_3: "5"
+  pin_zone_4: "4"
+  pin_zone_5: "3"
+  pin_zone_6: "2"
+  pin_zone_7: "1"
+  pin_zone_8: "0"
+
+# Names for button presses
+  name_power: "Power"
+  name_mode: "Mode"
+  name_fan: "Fan"
+  name_temp_up: "Temp_Up"
+  name_temp_down: "Temp_Down"
+  name_timer: "Timer"
+  name_timer_up: "Timer_Up"
+  name_timer_down: "Timer_Down"
+
+  # Names for Zones  
+  name_zone_1: "Zone_1"
+  name_zone_2: "Zone_2"
+  name_zone_3: "Zone_3"
+  name_zone_4: "Zone_4"
+  name_zone_5: "Zone_5"
+  name_zone_6: "Zone_6"
+  name_zone_7: "Zone_7"
+  name_zone_8: "Zone_8"
+
+
+packages:
+#  actron_air: github://nevilth/actron-air-esphome/esp32dev-actron-air.yaml@main
+<<: !include ./esp32dev-actron-air.yaml
+
+switch:
+  - id: !remove zone_6_switch
+  - id: !remove zone_7_switch
+  - id: !remove zone_8_switch
+
+  - id: !remove zone_6
+  - id: !remove zone_7
+  - id: !remove zone_8  

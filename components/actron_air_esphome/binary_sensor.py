@@ -23,7 +23,7 @@ CONF_AUTO_MODE = "auto_mode"
 CONF_HEAT = "heat"
 CONF_RUN = "run"
 CONF_TIMER = "timer"
-CONF_INSIDE = "inside"
+CONF_SETPOINT = "setpoint"
 CONF_ZONE_1 = "zone_1"
 CONF_ZONE_2 = "zone_2"
 CONF_ZONE_3 = "zone_3"
@@ -32,6 +32,7 @@ CONF_ZONE_5 = "zone_5"
 CONF_ZONE_6 = "zone_6"
 CONF_ZONE_7 = "zone_7"
 CONF_ZONE_8 = "zone_8"
+
 
 # Mapping of config keys to C++ BinarySensorId enum values
 SENSOR_MAP: list[tuple[str, Any]] = [
@@ -44,7 +45,7 @@ SENSOR_MAP: list[tuple[str, Any]] = [
     (CONF_HEAT, BinarySensorId.HEAT),
     (CONF_RUN, BinarySensorId.RUN),
     (CONF_TIMER, BinarySensorId.TIMER),
-    (CONF_INSIDE, BinarySensorId.INSIDE),
+    (CONF_SETPOINT, BinarySensorId.SETPOINT),
     (CONF_ZONE_1, BinarySensorId.ZONE_1),
     (CONF_ZONE_2, BinarySensorId.ZONE_2),
     (CONF_ZONE_3, BinarySensorId.ZONE_3),
@@ -53,6 +54,7 @@ SENSOR_MAP: list[tuple[str, Any]] = [
     (CONF_ZONE_6, BinarySensorId.ZONE_6),
     (CONF_ZONE_7, BinarySensorId.ZONE_7),
     (CONF_ZONE_8, BinarySensorId.ZONE_8),
+
 ]
 
 CONFIG_SCHEMA = cv.Schema(
@@ -67,7 +69,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_HEAT): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_RUN): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_TIMER): binary_sensor.binary_sensor_schema(),
-        cv.Optional(CONF_INSIDE): binary_sensor.binary_sensor_schema(),
+        cv.Optional(CONF_SETPOINT): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_1): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_2): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_3): binary_sensor.binary_sensor_schema(),
@@ -76,6 +78,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_ZONE_6): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_7): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_8): binary_sensor.binary_sensor_schema(),
+
     }
 )
 

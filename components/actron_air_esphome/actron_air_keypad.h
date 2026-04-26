@@ -4,6 +4,9 @@
 #include <atomic>
 #include <cstddef>
 #include <cstdint>
+#include <charconv>
+#include <string>
+#include <iostream>
 
 #include "esphome/components/binary_sensor/binary_sensor.h"
 #include "esphome/components/sensor/sensor.h"
@@ -62,7 +65,7 @@ namespace esphome {
 
       // Other status indicators
       TIMER = 7,
-      INSIDE = 33,
+      SETPOINT = 33,
 
       // 7-segment display - Digit 1 (leftmost)
       DIGIT1_A = 39,
@@ -106,7 +109,7 @@ namespace esphome {
       HEAT,
       RUN,
       TIMER,
-      INSIDE,
+      SETPOINT,
       ZONE_1,
       ZONE_2,
       ZONE_3,
@@ -140,7 +143,8 @@ namespace esphome {
         void set_error_count_sensor(sensor::Sensor *s) { error_count_sensor_ = s; }
         void set_status_count_sensor(sensor::Sensor *s) { status_count_sensor_ = s; }
         void set_bit_string_sensor(text_sensor::TextSensor *s) { bit_string_ = s; }
-
+        void set_lcd_string_sensor(text_sensor::TextSensor *s) { lcd_string_ = s; }
+        
         void set_binary_sensor(BinarySensorId id, binary_sensor::BinarySensor *s) {
           binary_sensors_[static_cast<std::size_t>(id)] = s;
         }
@@ -148,7 +152,8 @@ namespace esphome {
       private:
         static void IRAM_ATTR handle_interrupt(ActronAirKeypad *arg);
         void process_frame();
-        float get_display_value() const;
+        std::string get_display_string() const;
+        float get_setpoint_value(std::string display_string) const;
         static char decode_digit(uint8_t segment_bits);
 
         bool get_pulse(LedIndex idx) const {
@@ -162,7 +167,7 @@ namespace esphome {
         sensor::Sensor *error_count_sensor_{nullptr};
         sensor::Sensor *status_count_sensor_{nullptr};
         text_sensor::TextSensor *bit_string_{nullptr};
-
+        text_sensor::TextSensor *lcd_string_{nullptr};
         std::array<binary_sensor::BinarySensor *, BINARY_SENSOR_COUNT>
             binary_sensors_{};
 

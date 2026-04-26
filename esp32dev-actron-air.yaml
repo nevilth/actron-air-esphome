@@ -566,17 +566,17 @@ switch:
     lambda: return id(zone_8).state;
        
 
-external_components:
-  - source: github://nevilth/actron-air-esphome
-    components: [actron_air_esphome]
-    refresh: 0s
-
 #external_components:
-#  - source:
-#      type: local
-#      path: external_components
+#  - source: github://nevilth/actron-air-esphome
 #    components: [actron_air_esphome]
 #    refresh: 0s
+
+external_components:
+  - source:
+      type: local
+      path: components
+    components: [actron_air_esphome]
+    refresh: 0s
 
 actron_air_esphome:
   id: actron_air_esphome_1
@@ -636,7 +636,10 @@ text_sensor:
       name: "Bit String"
       id: bit_string
       internal: true
-  
+    lcd_string:
+      name: "LCD String"
+      id: lcd_string
+
   - platform: template
     name: "Fan Mode"
     update_interval: 1s
@@ -731,9 +734,9 @@ binary_sensor:
     timer:
       id: timer
       name: "Timer"
-    inside:
-      id: inside
-      name: "Inside"
+    setpoint:
+      id: setpoint
+      name: "Setpoint"
     zone_1:
       id: zone_1
       name: "Zone 1"
@@ -758,4 +761,6 @@ binary_sensor:
     zone_8:
       id: zone_8
       name: "Zone 8"
-
+#    inside:
+#      id: inside
+#      name: "Inside"

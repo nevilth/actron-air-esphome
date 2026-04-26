@@ -11,11 +11,13 @@ from . import ActronAirKeypad, CONF_ACTRON_AIR_ESPHOME_ID
 DEPENDENCIES = ['actron_air_esphome']
 
 CONF_BIT_STRING = 'bit_string'
+CONF_LCD_STRING = 'lcd_string'
 
 CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_ACTRON_AIR_ESPHOME_ID): cv.use_id(ActronAirKeypad),
         cv.Optional(CONF_BIT_STRING): text_sensor.text_sensor_schema(),
+        cv.Optional(CONF_LCD_STRING): text_sensor.text_sensor_schema(),
     }
 )
 
@@ -26,3 +28,7 @@ async def to_code(config: dict[str, Any]) -> None:
     if CONF_BIT_STRING in config:
         sens = await text_sensor.new_text_sensor(config[CONF_BIT_STRING])
         cg.add(parent.set_bit_string_sensor(sens))
+
+    if CONF_LCD_STRING in config:
+        sens = await text_sensor.new_text_sensor(config[CONF_LCD_STRING])
+        cg.add(parent.set_lcd_string_sensor(sens))

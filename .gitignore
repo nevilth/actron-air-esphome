@@ -6,7 +6,7 @@
 /.esphome/
 /secrets.yaml
 /esp32dev-actron-211704.yaml
-
+*.bak
 custom_components/actron_air_esphome/frontend/actron-air-esphome-card.js
 
 # Home Assistant dev config (runtime files)
