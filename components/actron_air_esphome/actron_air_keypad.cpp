@@ -134,24 +134,6 @@ namespace esphome {
         return -1.0f; // Parsing error  
       }
 
-//      char c1 = display[0];
-//      char c2 = display[1];
-//      char c3 = display[2];
-
-//      if (!std::isdigit(static_cast<unsigned char>(c1)) ||
-//          !std::isdigit(static_cast<unsigned char>(c2)) ||
-//          !std::isdigit(static_cast<unsigned char>(c3))) {
-//        return -1.0f;
-//      }
-
-//      int value = (c1 - '0') * 100 + (c2 - '0') * 10 + (c3 - '0');
-//      float display_value = static_cast<float>(value);
-
-//      if (get_pulse(L::DP)) {
-//        display_value *= 0.1f;
-//      }
-
-//      return display_value;
     }
 
     void IRAM_ATTR ActronAirKeypad::handle_interrupt(ActronAirKeypad *arg) {
@@ -345,14 +327,14 @@ namespace esphome {
       }
 
       // set the virtual inside binary sensor.
-//      if(inside_) {
-//        if (!get_pulse(LedIndex::SETPOINT) && get_pulse(LedIndex::ZONE_8)) {
-//          // If the setpoint LED is off and the zone 8 LED is on, we can be pretty confident that we are showing the current temperature and that we are inside, so we can publish the inside binary sensor as true
-//          inside_->publish_state(true);
-//       } else {
-//             inside_->publish_state(false);
-//        }
-//      }
+     if(inside_) {
+        if (!get_pulse(LedIndex::SETPOINT) && get_pulse(LedIndex::ZONE_8)) {
+          // If the setpoint LED is off and the zone 8 LED is on, we can be pretty confident that we are showing the current temperature and that we are inside, so we can publish the inside binary sensor as true
+          inside_->publish_state(true);
+       } else {
+             inside_->publish_state(false);
+        }
+      }
     }
 
     void ActronAirKeypad::dump_config() {

@@ -761,6 +761,6 @@ binary_sensor:
     zone_8:
       id: zone_8
       name: "Zone 8"
-#    inside:
-#      id: inside
-#      name: "Inside"
+    inside:
+      id: inside
+      name: "Inside"

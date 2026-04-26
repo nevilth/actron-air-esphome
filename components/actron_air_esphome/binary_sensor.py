@@ -32,7 +32,7 @@ CONF_ZONE_5 = "zone_5"
 CONF_ZONE_6 = "zone_6"
 CONF_ZONE_7 = "zone_7"
 CONF_ZONE_8 = "zone_8"
-
+CONF_INSIDE = "inside"
 
 # Mapping of config keys to C++ BinarySensorId enum values
 SENSOR_MAP: list[tuple[str, Any]] = [
@@ -54,7 +54,6 @@ SENSOR_MAP: list[tuple[str, Any]] = [
     (CONF_ZONE_6, BinarySensorId.ZONE_6),
     (CONF_ZONE_7, BinarySensorId.ZONE_7),
     (CONF_ZONE_8, BinarySensorId.ZONE_8),
-
 ]
 
 CONFIG_SCHEMA = cv.Schema(
@@ -78,7 +77,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_ZONE_6): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_7): binary_sensor.binary_sensor_schema(),
         cv.Optional(CONF_ZONE_8): binary_sensor.binary_sensor_schema(),
-
+        cv.Optional(CONF_INSIDE): binary_sensor.binary_sensor_schema(),
     }
 )
 
@@ -90,3 +89,7 @@ async def to_code(config: dict[str, Any]) -> None:
         if conf_key in config:
             sens = await binary_sensor.new_binary_sensor(config[conf_key])
             cg.add(parent.set_binary_sensor(sensor_id, sens))
+
+    if CONF_INSIDE in config:
+        sens = await binary_sensor.new_binary_sensor(config[CONF_INSIDE])
+        cg.add(parent.set_inside_sensor(sens))

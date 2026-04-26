@@ -118,8 +118,8 @@ namespace esphome {
       ZONE_6,
       ZONE_7,
       ZONE_8,
-      COUNT  // Must be last - used for array sizing
-    };
+      COUNT,
+     };
 
     // Number of binary sensors
     constexpr std::size_t BINARY_SENSOR_COUNT =
@@ -149,6 +149,8 @@ namespace esphome {
           binary_sensors_[static_cast<std::size_t>(id)] = s;
         }
 
+        void set_inside_sensor(binary_sensor::BinarySensor *s) { inside_ = s; }
+
       private:
         static void IRAM_ATTR handle_interrupt(ActronAirKeypad *arg);
         void process_frame();
@@ -170,6 +172,7 @@ namespace esphome {
         text_sensor::TextSensor *lcd_string_{nullptr};
         std::array<binary_sensor::BinarySensor *, BINARY_SENSOR_COUNT>
             binary_sensors_{};
+        binary_sensor::BinarySensor *inside_{nullptr};
 
         // Protocol state (main loop only)
         uint64_t pulses_{0};  // Snapshot for sensor publishing
