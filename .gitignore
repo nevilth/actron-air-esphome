@@ -1,14 +1,14 @@
-/cdeps
-/node_modules
-/dist
-/.venv
-/.esphome
-/.esphome/
-/secrets.yaml
-/esp32dev-actron-211704.yaml
-components/actron_air_esphome/__pycache__
+cdeps
+node_modules
+dist
+.venv
+.esphome
+.esphome/
+secrets.yaml
+esp32dev-actron-211704.yaml
+components\actron_air_esphome\__pycache__
 *.bak
-custom_components/actron_air_esphome/frontend/actron-air-esphome-card.js
+custom_components\actron_air_esphome\frontend\actron-air-esphome-card.js
 
 # Home Assistant dev config (runtime files)
 ha-config/.storage/
