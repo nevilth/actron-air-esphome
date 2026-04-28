@@ -110,6 +110,15 @@ namespace esphome {
       RUN,
       TIMER,
       SETPOINT,
+      COUNT,
+     };
+
+    // Number of binary sensors
+    constexpr std::size_t BINARY_SENSOR_COUNT =
+        static_cast<std::size_t>(BinarySensorId::COUNT);
+
+            // Binary sensor identifiers for array indexing
+    enum class ZoneSensorId : uint8_t {
       ZONE_1,
       ZONE_2,
       ZONE_3,
@@ -122,8 +131,8 @@ namespace esphome {
      };
 
     // Number of binary sensors
-    constexpr std::size_t BINARY_SENSOR_COUNT =
-        static_cast<std::size_t>(BinarySensorId::COUNT);
+    constexpr std::size_t ZONE_SENSOR_COUNT =
+        static_cast<std::size_t>(ZoneSensorId::COUNT);
 
     /// ESPHome component that decodes Actron Air keypad display data.
     ///
@@ -143,12 +152,13 @@ namespace esphome {
         void set_error_count_sensor(sensor::Sensor *s) { error_count_sensor_ = s; }
         void set_status_count_sensor(sensor::Sensor *s) { status_count_sensor_ = s; }
         void set_bit_string_sensor(text_sensor::TextSensor *s) { bit_string_ = s; }
-        void set_lcd_string_sensor(text_sensor::TextSensor *s) { lcd_string_ = s; }
-        
+        void set_lcd_string_sensor(text_sensor::TextSensor *s) { lcd_string_ = s; }       
         void set_binary_sensor(BinarySensorId id, binary_sensor::BinarySensor *s) {
           binary_sensors_[static_cast<std::size_t>(id)] = s;
         }
-
+        void set_zone_sensor(ZoneSensorId id, binary_sensor::BinarySensor *s) {
+          zone_sensors_[static_cast<std::size_t>(id)] = s;
+        }
         void set_inside_sensor(binary_sensor::BinarySensor *s) { inside_ = s; }
 
       private:
@@ -172,6 +182,8 @@ namespace esphome {
         text_sensor::TextSensor *lcd_string_{nullptr};
         std::array<binary_sensor::BinarySensor *, BINARY_SENSOR_COUNT>
             binary_sensors_{};
+        std::array<binary_sensor::BinarySensor *, ZONE_SENSOR_COUNT>
+            zone_sensors_{};
         binary_sensor::BinarySensor *inside_{nullptr};
 
         // Protocol state (main loop only)

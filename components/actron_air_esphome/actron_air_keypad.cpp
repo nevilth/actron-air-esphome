@@ -24,6 +24,17 @@ namespace esphome {
             {LedIndex::RUN, false},
             {LedIndex::TIMER, false},
             {LedIndex::SETPOINT, false},
+        }};
+
+    // Mapping from ZoneSensorId to LedIndex with inversion flag
+    struct ZoneSensorMapping {
+      LedIndex led_index;
+      bool invert;
+    };
+
+    // Static mapping table - order must match ZoneSensorId enum
+    static constexpr std::array<ZoneSensorMapping, ZONE_SENSOR_COUNT>
+        ZONE_SENSOR_MAPPINGS = {{
             {LedIndex::ZONE_1, false},
             {LedIndex::ZONE_2, false},
             {LedIndex::ZONE_3, false},
@@ -323,6 +334,16 @@ namespace esphome {
           const auto &mapping = BINARY_SENSOR_MAPPINGS[i];
           bool state = get_pulse(mapping.led_index);
           binary_sensors_[i]->publish_state(mapping.invert ? !state : state);
+        }
+      }
+
+      for (std::size_t i = 0; i < ZONE_SENSOR_COUNT; ++i) {
+        if (zone_sensors_[i]) {
+          const auto &mapping = ZONE_SENSOR_MAPPINGS[i];
+          bool state = get_pulse(mapping.led_index);
+          state = mapping.invert ? !state : state;
+          state = state && get_pulse(LedIndex::SETPOINT); // if setpoint LED is on then we are showing the setpoint temp and not the current temp, in this case we want to show all zones as off
+          zone_sensors_[i]->publish_state(state);
         }
       }
 

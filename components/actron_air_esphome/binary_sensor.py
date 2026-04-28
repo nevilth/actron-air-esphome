@@ -12,6 +12,7 @@ DEPENDENCIES = ["actron_air_esphome"]
 
 # C++ enum class for binary sensor IDs
 BinarySensorId = actron_air_esphome_ns.enum("BinarySensorId", is_class=True)
+ZoneSensorId = actron_air_esphome_ns.enum("ZoneSensorId", is_class=True)
 
 # Sensor configuration keys
 CONF_FAN_CONT = "fan_cont"
@@ -46,14 +47,18 @@ SENSOR_MAP: list[tuple[str, Any]] = [
     (CONF_RUN, BinarySensorId.RUN),
     (CONF_TIMER, BinarySensorId.TIMER),
     (CONF_SETPOINT, BinarySensorId.SETPOINT),
-    (CONF_ZONE_1, BinarySensorId.ZONE_1),
-    (CONF_ZONE_2, BinarySensorId.ZONE_2),
-    (CONF_ZONE_3, BinarySensorId.ZONE_3),
-    (CONF_ZONE_4, BinarySensorId.ZONE_4),
-    (CONF_ZONE_5, BinarySensorId.ZONE_5),
-    (CONF_ZONE_6, BinarySensorId.ZONE_6),
-    (CONF_ZONE_7, BinarySensorId.ZONE_7),
-    (CONF_ZONE_8, BinarySensorId.ZONE_8),
+]
+
+# Mapping of config keys to C++ ZoneSensorId enum values
+ZONE_MAP: list[tuple[str, Any]] = [
+    (CONF_ZONE_1, ZoneSensorId.ZONE_1),
+    (CONF_ZONE_2, ZoneSensorId.ZONE_2),
+    (CONF_ZONE_3, ZoneSensorId.ZONE_3),
+    (CONF_ZONE_4, ZoneSensorId.ZONE_4),
+    (CONF_ZONE_5, ZoneSensorId.ZONE_5),
+    (CONF_ZONE_6, ZoneSensorId.ZONE_6),
+    (CONF_ZONE_7, ZoneSensorId.ZONE_7),
+    (CONF_ZONE_8, ZoneSensorId.ZONE_8),
 ]
 
 CONFIG_SCHEMA = cv.Schema(
@@ -89,6 +94,11 @@ async def to_code(config: dict[str, Any]) -> None:
         if conf_key in config:
             sens = await binary_sensor.new_binary_sensor(config[conf_key])
             cg.add(parent.set_binary_sensor(sensor_id, sens))
+
+    for conf_key, sensor_id in ZONE_MAP:
+        if conf_key in config:
+            sens = await binary_sensor.new_binary_sensor(config[conf_key])
+            cg.add(parent.set_zone_sensor(sensor_id, sens))
 
     if CONF_INSIDE in config:
         sens = await binary_sensor.new_binary_sensor(config[CONF_INSIDE])
