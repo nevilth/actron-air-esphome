@@ -252,6 +252,7 @@ switch:
     id: zone_5_switch
     name: "Zone 5"
     icon: mdi:air-conditioner
+    restore_mode: DISABLED
     turn_on_action:
       - lambda: |-
           id(dac_value)=${voltage_zone_5};
@@ -357,6 +358,9 @@ text_sensor:
       name: "Bit String"
       id: bit_string
       internal: true
+    lcd_string:
+      name: "LCD String"
+      id: lcd_string
 
   - platform: template
     name: "Fan Mode"
@@ -452,9 +456,9 @@ binary_sensor:
     timer:
       id: timer
       name: "Timer"
-    inside:
-      id: inside
-      name: "Inside"
+    setpoint:
+      id: setpoint
+      name: "Setpoint"
     zone_1:
       id: zone_1
       name: "Zone 1"
@@ -479,3 +483,6 @@ binary_sensor:
     zone_8:
       id: zone_8
       name: "Zone 8"
+    inside:
+      id: inside
+      name: "Inside"
