@@ -320,7 +320,7 @@ namespace esphome {
 
       bool setpoint = get_pulse(LedIndex::SETPOINT);
       // If the setpoint LED is off and the zone 8 LED is on, we can be pretty confident that we are showing the current temperature and that we are inside, so we can publish the inside binary sensor as true
-      bool inside = (setpoint && get_pulse(LedIndex::ZONE_8));
+      bool inside = (!setpoint && get_pulse(LedIndex::ZONE_8));
 
 
       std::string display_string = get_display_string();
@@ -335,12 +335,8 @@ namespace esphome {
 
       // set the virtual inside binary sensor.
       if(inside_) {
-        if (inside) {
-          inside_->publish_state(true);
-        } else {
-          inside_->publish_state(false);
+          inside_->publish_state(inside);
         }
-      }
 
       //populate binary sensors based on mapping table.
       for (std::size_t i = 0; i < BINARY_SENSOR_COUNT; ++i) {
@@ -362,7 +358,9 @@ namespace esphome {
         if (zone_sensors_[i]) {
           const auto &mapping = ZONE_SENSOR_MAPPINGS[i];
           bool state = get_pulse(mapping.led_index);
-          state = mapping.invert ? !state : state;
+          if(setpoint) {
+            state = mapping.invert ? !state : state;
+          }
           state = state && (setpoint || inside); // if setpoint LED is on then we are showing the setpoint temp and not the current temp, in this case we want to show all zones as off
           zone_sensors_[i]->publish_state(state);
         }
