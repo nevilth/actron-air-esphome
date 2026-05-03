@@ -354,14 +354,14 @@ namespace esphome {
       //While setpoint LED is OFF, the Inside LED (and associated zone LED) will flash on and off for about 5 seconds.
       //need to properley handle zone 8 (it is the sudo inside zone but can also be required if user is getting zone 8 inside temp)
       //and zone 5 does not appear to properley turn off when setpoint is off - more work needed.
+      bool state = false;
       for (std::size_t i = 0; i < ZONE_SENSOR_COUNT; ++i) {
         if (zone_sensors_[i]) {
           const auto &mapping = ZONE_SENSOR_MAPPINGS[i];
-          bool state = get_pulse(mapping.led_index);
-          if(setpoint) {
-            state = mapping.invert ? !state : state;
-          }
+          state = get_pulse(mapping.led_index);
+          state = setpoint && mapping.invert ? !state : state;  //zones 5-8 use inverted logica when in setpoint mode
           state = state && (setpoint || inside); // if setpoint LED is on then we are showing the setpoint temp and not the current temp, in this case we want to show all zones as off
+          state = state && !(inside && i == 7); // zone 8 is the sudo inside zone - show it as off when inside is true (this is a special case - to be reviewed and tested).
           zone_sensors_[i]->publish_state(state);
         }
       }
