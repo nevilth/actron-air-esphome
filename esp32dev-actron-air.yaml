@@ -451,12 +451,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_power}_${pin_power});
-          id(output_name) = "${name_power}";
+          id(output_name) = "${name_power} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_power}_${pin_power});
-          id(output_name) = "${name_power}";
+          id(output_name) = "${name_power} OFF";
           id(press_button).press();
     lambda: |-
       return (id(cool).state or id(auto_mode).state or id(heat).state or id(fan_cont).state or id(fan_high).state or id(fan_mid).state or id(fan_low).state);
@@ -469,12 +469,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_1}_${pin_zone_1});
-          id(output_name) = "${name_zone_1}";
+          id(output_name) = "${name_zone_1} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_1}_${pin_zone_1});
-          id(output_name) = "${name_zone_1}";
+          id(output_name) = "${name_zone_1} OFF";
           id(press_button).press();
     lambda: return id(zone_1).state;
 
@@ -486,12 +486,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_2}_${pin_zone_2});
-          id(output_name) = "${name_zone_2}";
+          id(output_name) = "${name_zone_2} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_2}_${pin_zone_2});
-          id(output_name) = "${name_zone_2}"; 
+          id(output_name) = "${name_zone_2} OFF";
           id(press_button).press();
     lambda: return id(zone_2).state;
 
@@ -503,12 +503,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_3}_${pin_zone_3});
-          id(output_name) = "${name_zone_3}";
+          id(output_name) = "${name_zone_3} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_3}_${pin_zone_3});
-          id(output_name) = "${name_zone_3}"; 
+          id(output_name) = "${name_zone_3} OFF";
           id(press_button).press();
     lambda: return id(zone_3).state;
 
@@ -520,12 +520,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_4}_${pin_zone_4});
-          id(output_name) = "${name_zone_4}";
+          id(output_name) = "${name_zone_4} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_4}_${pin_zone_4});
-          id(output_name) = "${name_zone_4}";
+          id(output_name) = "${name_zone_4} OFF";
           id(press_button).press();
     lambda: return id(zone_4).state;
 
@@ -537,12 +537,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_5}_${pin_zone_5});
-          id(output_name) = "${name_zone_5}";
+          id(output_name) = "${name_zone_5} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_5}_${pin_zone_5});
-          id(output_name) = "${name_zone_5}";
+          id(output_name) = "${name_zone_5} OFF";
           id(press_button).press();
     lambda: return id(zone_5).state;
 
@@ -554,12 +554,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_6}_${pin_zone_6});
-          id(output_name) = "${name_zone_6}";
+          id(output_name) = "${name_zone_6} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_6}_${pin_zone_6});
-          id(output_name) = "${name_zone_6}"; 
+          id(output_name) = "${name_zone_6} OFF"; 
           id(press_button).press();
     lambda: return id(zone_6).state;
 
@@ -571,12 +571,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_7}_${pin_zone_7});
-          id(output_name) = "${name_zone_7}";
+          id(output_name) = "${name_zone_7} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_7}_${pin_zone_7});
-          id(output_name) = "${name_zone_7}";
+          id(output_name) = "${name_zone_7} OFF";
           id(press_button).press();
     lambda: return id(zone_7).state;
 
@@ -588,12 +588,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_8}_${pin_zone_8});
-          id(output_name) = "${name_zone_8}";
+          id(output_name) = "${name_zone_8} ON";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_8}_${pin_zone_8});
-          id(output_name) = "${name_zone_8}"; 
+          id(output_name) = "${name_zone_8} OFF";
           id(press_button).press();
     lambda: return id(zone_8).state;
        
