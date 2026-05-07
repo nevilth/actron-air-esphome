@@ -133,7 +133,13 @@ namespace esphome {
       }
       
       //convert string to float
-      
+      //auto start = display_string.data();
+      //auto end = display_string.data() + display_string.size();
+    
+      //while (start < end && std::isspace(static_cast<unsigned char>(*start))) {
+      //  ++start;
+      //}
+
       float display_value = 0;
       const auto format = std::chars_format::general;
       const auto res = std::from_chars(display_string.data(), display_string.data() + display_string.size(), display_value, format);

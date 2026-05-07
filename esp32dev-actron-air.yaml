@@ -170,6 +170,9 @@ globals:
   - id: prev_fan
     type: std::string
     initial_value: '"Unset"'
+  - id: output_name
+    type: std::string
+    initial_value: '"Unset"'
   - id: output_id
     type: 'gpio::GPIOBinaryOutput*'
     restore_value: no
@@ -352,6 +355,10 @@ button:
     internal: true
     icon: mdi:power
     on_press:
+      - logger.log: 
+          format: "Button %s Pressed"
+          args: [id(output_name).c_str()]
+          level: INFO
       - lambda: |-
           id(output_id)->turn_on();
       - delay: !lambda 'return id(button_set_time).state;'
@@ -365,6 +372,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_fan}_${pin_fan});
+          id(output_name) = "${name_fan}";
           id(press_button).press();
 
   - platform: template
@@ -373,6 +381,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_mode}_${pin_mode});
+          id(output_name) = "${name_mode}";
           id(press_button).press();
 
   - platform: template
@@ -381,6 +390,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_temp_up}_${pin_temp_up});
+          id(output_name) = "${name_temp_up}";
           id(press_button).press();
 
   - platform: template
@@ -389,6 +399,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_temp_down}_${pin_temp_down});
+          id(output_name) = "${name_temp_down}";
           id(press_button).press();
 
   - platform: template
@@ -397,6 +408,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_timer}_${pin_timer});
+          id(output_name) = "${name_timer}";  
           id(press_button).press();
 
   - platform: template
@@ -405,6 +417,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_timer_up}_${pin_timer_up});
+          id(output_name) = "${name_timer_up}";
           id(press_button).press();
 
   - platform: template
@@ -413,6 +426,7 @@ button:
     on_press:
       - lambda: |-
           id(output_id)=id(Output_${name_timer_down}_${pin_timer_down});
+          id(output_name) = "${name_timer_down}";
           id(press_button).press();
 
   - platform: restart
@@ -437,10 +451,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_power}_${pin_power});
+          id(output_name) = "${name_power}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_power}_${pin_power});
+          id(output_name) = "${name_power}";
           id(press_button).press();
     lambda: |-
       return (id(cool).state or id(auto_mode).state or id(heat).state or id(fan_cont).state or id(fan_high).state or id(fan_mid).state or id(fan_low).state);
@@ -453,10 +469,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_1}_${pin_zone_1});
+          id(output_name) = "${name_zone_1}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_1}_${pin_zone_1});
+          id(output_name) = "${name_zone_1}";
           id(press_button).press();
     lambda: return id(zone_1).state;
 
@@ -468,10 +486,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_2}_${pin_zone_2});
+          id(output_name) = "${name_zone_2}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_2}_${pin_zone_2});
+          id(output_name) = "${name_zone_2}"; 
           id(press_button).press();
     lambda: return id(zone_2).state;
 
@@ -483,10 +503,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_3}_${pin_zone_3});
+          id(output_name) = "${name_zone_3}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_3}_${pin_zone_3});
+          id(output_name) = "${name_zone_3}"; 
           id(press_button).press();
     lambda: return id(zone_3).state;
 
@@ -498,10 +520,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_4}_${pin_zone_4});
+          id(output_name) = "${name_zone_4}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_4}_${pin_zone_4});
+          id(output_name) = "${name_zone_4}";
           id(press_button).press();
     lambda: return id(zone_4).state;
 
@@ -513,10 +537,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_5}_${pin_zone_5});
+          id(output_name) = "${name_zone_5}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_5}_${pin_zone_5});
+          id(output_name) = "${name_zone_5}";
           id(press_button).press();
     lambda: return id(zone_5).state;
 
@@ -528,10 +554,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_6}_${pin_zone_6});
+          id(output_name) = "${name_zone_6}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_6}_${pin_zone_6});
+          id(output_name) = "${name_zone_6}"; 
           id(press_button).press();
     lambda: return id(zone_6).state;
 
@@ -543,10 +571,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_7}_${pin_zone_7});
+          id(output_name) = "${name_zone_7}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_7}_${pin_zone_7});
+          id(output_name) = "${name_zone_7}";
           id(press_button).press();
     lambda: return id(zone_7).state;
 
@@ -558,10 +588,12 @@ switch:
     turn_on_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_8}_${pin_zone_8});
+          id(output_name) = "${name_zone_8}";
           id(press_button).press();
     turn_off_action:
       - lambda: |-
           id(output_id)=id(Output_${name_zone_8}_${pin_zone_8});
+          id(output_name) = "${name_zone_8}"; 
           id(press_button).press();
     lambda: return id(zone_8).state;
        
