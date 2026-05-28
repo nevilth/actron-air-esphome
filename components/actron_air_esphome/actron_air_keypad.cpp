@@ -65,10 +65,10 @@ namespace esphome {
         return '4'; // BCFG
       case 0x6D:
         return '5'; // ACDFG
-      case 0x07:
-        return '7'; // ABC
       case 0x7C:
         return '6'; // CDEFG (no A)
+      case 0x07:
+        return '7'; // ABC
       case 0x7F:
         return '8'; // ABCDEFG
       case 0x67:
@@ -79,12 +79,18 @@ namespace esphome {
       case 0x40:
         return '-'; // G (dash)
 
+      case 0x71:
+        return 'F'; // AEFG
       case 0x79:
         return 'E'; // ADEFG
-      case 0x5F:
-        return 'S'; // ABDEFG
+      case 0x5C:
+        return 'H'; // BCEFG
+      case 0x54:
+        return 'L'; // ABCDG
       case 0x73:
         return 'P'; // ABEFG
+      case 0x5F:
+        return 'S'; // ABDEFG
 
       default:
         ESP_LOGE(TAG, "Unknown 7-segment pattern: 0x%02X", pattern);
