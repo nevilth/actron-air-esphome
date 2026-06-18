@@ -601,17 +601,17 @@ switch:
     lambda: return id(zone_8).state;
        
 
-#external_components:
-#  - source: github://nevilth/actron-air-esphome
-#    components: [actron_air_esphome]
-#    refresh: 0s
-
 external_components:
-  - source:
-      type: local
-      path: components
+  - source: github://nevilth/actron-air-esphome
     components: [actron_air_esphome]
     refresh: 0s
+
+#external_components:
+#  - source:
+#      type: local
+#      path: components
+#    components: [actron_air_esphome]
+#    refresh: 0s
 
 actron_air_esphome:
   id: actron_air_esphome_1
