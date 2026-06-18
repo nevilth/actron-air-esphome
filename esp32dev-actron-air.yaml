@@ -367,7 +367,7 @@ button:
       - delay: !lambda 'return id(button_set_time).state;'
       - lambda: |-
           id(output_id)->turn_off();
-      - delay: 250ms
+      - delay: 1000ms
 
   - platform: template
     name: "Fan"

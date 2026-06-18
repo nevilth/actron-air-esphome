@@ -139,16 +139,16 @@ namespace esphome {
       }
       
       //convert string to float
-      //auto start = display_string.data();
-      //auto end = display_string.data() + display_string.size();
+      auto start = display_string.data();
+      auto end = display_string.data() + display_string.size();
     
-      //while (start < end && std::isspace(static_cast<unsigned char>(*start))) {
-      //  ++start;
-      //}
+      while (start < end && std::isspace(static_cast<unsigned char>(*start))) {
+        ++start;
+      }
 
       float display_value = 0;
       const auto format = std::chars_format::general;
-      const auto res = std::from_chars(display_string.data(), display_string.data() + display_string.size(), display_value, format);
+      const auto res = std::from_chars(start, end, display_value, format);
       
       if (res.ec == std::errc()) {
         return display_value;
@@ -320,6 +320,25 @@ namespace esphome {
       this->has_new_data_ = false;
       ESP_LOGD(TAG, "New data available");
 
+      bool setpoint = get_pulse(LedIndex::SETPOINT);
+      bool dp = get_pulse(LedIndex::DP);
+
+      // Determine inside state based on setpoint and decimal point LEDs - this is a bit of heuristic logic based on observed behavior of the keypad - it appears that when the setpoint LED is off and the decimal point is on we are showing the current temperature and we are inside, in this case we want to show the inside binary sensor as true. When the setpoint LED is on we are showing the setpoint temperature and not the current temperature, in this case we want to show all zones as off and we can't be sure if we are inside or not based on the LEDs alone so we will leave the inside binary sensor as false. This logic may need to be refined based on further testing and observation of the keypad behavior.
+      if(!inside_temp_) {
+        if(!setpoint) {
+          inside_temp_ = true;
+          ESP_LOGD(TAG, "Inside temp detected based on setpoint and decimal point LEDs");
+        }
+      } else { 
+        if(setpoint && get_pulse(LedIndex::DP)) {
+          for (std::size_t i = 0; i < 4; ++i) {
+            inside_temp_ = false;
+            ESP_LOGD(TAG, "Inside temp no longer detected based on setpoint and decimal point LEDs");
+            break;
+          }
+        }
+      }
+
       if (bit_string_) {
         std::string text;
         text.reserve(NPULSE);
@@ -330,9 +349,8 @@ namespace esphome {
         bit_string_->publish_state(text);
       }
 
-      bool setpoint = get_pulse(LedIndex::SETPOINT);
-      // If the setpoint LED is off and the zone 8 LED is on, we can be pretty confident that we are showing the current temperature and that we are inside, so we can publish the inside binary sensor as true
-      bool inside = (!setpoint && get_pulse(LedIndex::ZONE_8));
+      // If the setpoint LED is off then flash inside along with dp.
+      bool inside = (inside_temp_ && !setpoint && get_pulse(LedIndex::ZONE_8));
 
 
       std::string display_string = get_display_string();
@@ -340,8 +358,8 @@ namespace esphome {
         lcd_string_->publish_state(display_string);
       }
       
-      // If the setpoint LED is on, we assume the display is showing the setpoint temperature
-      if (setpoint_temp_ && setpoint) {
+      // If we are not displaying inside temps, we assume the display is showing the setpoint temperature
+      if (setpoint_temp_ && !inside_temp_) {
         setpoint_temp_->publish_state(get_setpoint_value(display_string));
       }
 
@@ -359,21 +377,15 @@ namespace esphome {
         }
       }
 
-      //populate zone sensors based on mapping table.
-      //If setpoint LED is on the zones should show as issued.
-      //If setpoint LED is off and Inside LED is off then all zones should be off (temperature displayed is current temp at controller).
-      //If setpoint LED is off and Inside LED is on then 1 zone may be on to idicate the room temperature read from the sensor in that zone.
-      //While setpoint LED is OFF, the Inside LED (and associated zone LED) will flash on and off for about 5 seconds.
-      //need to properley handle zone 8 (it is the sudo inside zone but can also be required if user is getting zone 8 inside temp)
-      //and zone 5 does not appear to properley turn off when setpoint is off - more work needed.
       bool state = false;
       for (std::size_t i = 0; i < ZONE_SENSOR_COUNT; ++i) {
         if (zone_sensors_[i]) {
           const auto &mapping = ZONE_SENSOR_MAPPINGS[i];
           state = get_pulse(mapping.led_index);
-          state = setpoint && mapping.invert ? !state : state;  //zones 5-8 use inverted logica when in setpoint mode
-          state = state && (setpoint || inside); // if setpoint LED is on then we are showing the setpoint temp and not the current temp, in this case we want to show all zones as off
-          state = state && !(inside && i == 7); // zone 8 is the sudo inside zone - show it as off when inside is true (this is a special case - to be reviewed and tested).
+          state = mapping.invert ? !state : state;  //zones 5-8 use inverted logic
+          if(inside_temp_) { 
+            state = state && ( (!setpoint && i < 4) || (setpoint && i > 3) ) ; 
+          }
           zone_sensors_[i]->publish_state(state);
         }
       }

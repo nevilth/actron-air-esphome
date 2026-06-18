@@ -190,6 +190,7 @@ namespace esphome {
         uint64_t pulses_{0};  // Snapshot for sensor publishing
         bool has_new_data_{false};
         uint32_t status_count_{0};
+        bool inside_temp_{false}; // Temporary variable to track inside state based on setpoint and decimal point.
 
         // ISR-only state (not shared)
         uint64_t last_intr_us_{0};

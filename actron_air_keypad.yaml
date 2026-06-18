@@ -387,6 +387,26 @@ text_sensor:
         return {current_fan};
       }
       return {};
+  
+  - platform: template  
+    name: "Heat Mode"
+    update_interval: 1s
+    lambda: |-
+      std::string current_mode = "";
+      if (id(cool).state) {
+        current_mode="Cool";
+      } else if (id(heat).state) {
+        current_mode="Heat";
+      } else if (id(auto_mode).state) {
+        current_mode="Auto";
+      } else {
+        current_mode="Off";
+      }
+      if (current_mode.compare(id(prev_mode)) != 0) {
+        id(prev_mode) = current_mode;
+        return {current_mode};
+      }
+      return {};
 
   - platform: wifi_info
     ip_address:
